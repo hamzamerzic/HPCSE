@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 2.6)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-project (Exercise1)
+cmake_minimum_required(VERSION 2.8)
+project(Exercise1)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
-add_subdirectory (src)
+add_subdirectory(Exercise1)
