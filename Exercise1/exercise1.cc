@@ -37,7 +37,7 @@ void TestRiemannThreads(double (*f)(double), double a, double b, std::size_t N,
         a + (b - a)/num_thr * (i + 1), N / num_thr, std::ref(res));
 
   RiemannIntegral(f, a + (b - a)/num_thr * (num_thr - 1), b, N / num_thr, res);
-  for(auto& thread : threads) thread.join();
+  for (auto& thread : threads) thread.join();
 
   auto end_t = std::chrono::steady_clock::now();
   auto duration = end_t - start_t;
