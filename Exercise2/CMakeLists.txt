@@ -4,11 +4,14 @@ add_library(diffusion diffusion.cc)
 
 add_executable(exercise2-1 exercise2-1.cc)
 target_link_libraries(exercise2-1 
-                      diffusion)
+                      diffusion
+                      ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(exercise2-2 exercise2-2.cc)
+target_link_libraries(exercise2-2 ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(diffusion-test-compare diffusion-test-compare.cc)
 target_link_libraries(diffusion-test-compare
-                      diffusion)
+                      diffusion
+                      ${CMAKE_THREAD_LIBS_INIT})
 
