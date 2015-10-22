@@ -1,39 +1,43 @@
+#ifndef BARRIER_H
+#define BARRIER_H
+
 #include <thread>
-#include <utility>
 #include <mutex>
 
 class Barrier {
  public:
-  explicit Barrier(int nthreads) : nthreads_(nthreads) {
-    counter_.first = 0;
-    barrier_reached_.first = false;
-  }
+  explicit Barrier(int nthreads)
+      : nthreads_(nthreads), counter_(0), barrier_reached_(false) {}
 
   void wait() {
-    while (barrier_reached_.first); // In case one thread finishes more cycles
-    counter_.second.lock();
-    ++counter_.first;
-    counter_.second.unlock();
+    while (barrier_reached_);  // In case not all threads left
 
-    while (!CheckExitStatus());
+    b_mutex_.lock();
+    ++counter_;  // Each thread enters and increments counter
 
-    std::lock_guard<std::mutex> lg (counter_.second);
-
-    if (--counter_.first == 0) {
-      barrier_reached_.first = false;
+    if (counter_ == nthreads_) {
+      barrier_reached_ = true;
     }
+    b_mutex_.unlock();
+
+    while (!barrier_reached_);
+
+    b_mutex_.lock();
+    --counter_;
+
+    // When last thread leaves, the counter is zero
+    if (counter_ == 0) {
+      // Resets the barrier_reached -> initial state of the barrier
+      barrier_reached_ = false;
+    }
+    b_mutex_.unlock();
   }
 
  private:
-  bool CheckExitStatus() {
-    std::lock_guard<std::mutex> lg (barrier_reached_.second);
-    if (barrier_reached_.first || counter_.first == nthreads_) {
-      barrier_reached_.first = true;
-      return true;
-    }
-    return false;
-  }
   const int nthreads_;
-  std::pair<bool, std::mutex> barrier_reached_;
-  std::pair<int, std::mutex> counter_;
+  volatile bool barrier_reached_;
+  int counter_;
+  std::mutex b_mutex_;
 };
+
+#endif  // BARRIER_H

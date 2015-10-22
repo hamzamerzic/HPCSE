@@ -5,7 +5,9 @@
 #include <algorithm>
 
 int main(int argc, char *argv[]) {
-  const double sim_duration = 0.0001;
+
+  std::cerr << "Main thread id: " << std::this_thread::get_id() << std::endl;
+  const double sim_duration = 0.5;
   unsigned num_thr = 1;
   if (argc > 1) {
     num_thr = atoi(argv[1]);
@@ -14,7 +16,7 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "Using " << num_thr << " threads." << std::endl;
 
-  Diffusion d (16, 0.00001, 1);
+  Diffusion d (128, 0.00001, 1);
 
   auto start_t = std::chrono::steady_clock::now();
   d.Simulate(sim_duration);
@@ -23,17 +25,18 @@ int main(int argc, char *argv[]) {
   double elapsed_t = std::chrono::duration <double, std::milli>
       (duration).count();
   std::cout << "Finished serial: " << elapsed_t << std::endl;
-  d.print_result();
+  // d.print_result();
+
   d.clear_grid();
   std::cout << "\n";
-  d.print_result();
+
   start_t = std::chrono::steady_clock::now();
   d.SimulateParallel(sim_duration, num_thr);
   end_t = std::chrono::steady_clock::now();
   duration = end_t - start_t;
   elapsed_t = std::chrono::duration <double, std::milli> (duration).count();
   std::cout << "Finished parallel: " << elapsed_t << std::endl;
+  // d.print_result();
 
-  d.print_result();
   return 0;
 }

@@ -6,3 +6,4 @@ find_package(Threads REQUIRED)
 
 add_subdirectory(Exercise1)
 add_subdirectory(Exercise2)
+add_subdirectory(Exercise3)

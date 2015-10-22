@@ -1,31 +1,18 @@
 #include "diffusion.h"
-#include <iostream>
 
 Diffusion::Diffusion(unsigned steps, double dt, double D)
-    : steps_(steps), dt_(dt), D_(D), dx_(1. / steps) {
+    : steps_(steps), dt_(dt), D_(D), dx_(1. / (steps - 1)) {
   // Generating the empty grid
-  for (unsigned i = 0; i < steps; ++i) {
-    grid_.emplace_back(std::vector<double> (steps, 0));
-    grid_tmp_.emplace_back(std::vector<double> (steps, 0));
-  }
+  grid_.resize(steps_ * steps_, 0);
+  grid_tmp_.resize(steps_ * steps_, 0);
+
+  fac_ = dt_ * D_ / (dx_ * dx_);
 
   // Filling in the empty fields
   unsigned fourth = (steps + 1) / 4 + 1;
   for (int i = fourth; i < steps - fourth; ++i) {
     for (int j = fourth; j < steps - fourth; ++j)
-      grid_[i][j] = 1;
-  }
-}
-
-void Diffusion::NextStep(int row) {
-  // df/dt (t0) = (f(t0 + dt) - f(t0))/dt
-  for (unsigned i = 0; i <= steps_ - 1; ++i) {
-    grid_tmp_[row][i] = grid_[row][i] + dt_ * D_ / (dx_ * dx_) * (
-      (i == 0 ? 0. : grid_[row][i - 1]) +
-      (i == steps_ - 1 ? 0. : grid_[row][i + 1]) +
-      (row == 0 ? 0. : grid_[row - 1][i]) +
-      (row == steps_ - 1 ? 0. : grid_[row + 1][i]) -
-        4 * grid_[row][i]);
+      grid_[i * steps_ + j] = 1;
   }
 }
 
@@ -53,21 +40,18 @@ void Diffusion::SimulateParallel(double time, int num_thr) {
   }
 
   Simulate_(current_row, current_row + rows_per_thread, time, true, true);
-
   for(auto& thread : threads)
     thread.join();
 }
 
 void Diffusion::clear_grid() {
-  for (unsigned i = 0; i < steps_; ++i) {
-    std::fill(grid_[i].begin(), grid_[i].end(), 0.);
-    std::fill(grid_tmp_[i].begin(), grid_tmp_[i].end(), 0.);
-  }
+  std::fill(grid_.begin(), grid_.end(), 0.);
+  std::fill(grid_tmp_.begin(), grid_tmp_.end(), 0.);
 
   unsigned fourth = (steps_ + 1) / 4 + 1;
   for (int i = fourth; i < steps_ - fourth; ++i) {
     for (int j = fourth; j < steps_ - fourth; ++j)
-      grid_[i][j] = 1;
+      grid_[i * steps_ + j] = 1;
   }
 }
 
@@ -76,13 +60,20 @@ void Diffusion::Simulate_(int begin_row, int end_row, double time, bool par,
   double cur_time = 0;
   while (cur_time < time) {
     for (unsigned row = begin_row; row < end_row; ++row) {
-      NextStep(row);
+      // df/dt (t0) = (f(t0 + dt) - f(t0))/dt
+      for (unsigned i = 0; i < steps_; ++i) {
+        grid_tmp_[row * steps_ + i] = grid_[row * steps_ + i] + fac_ * (
+          (i == 0 ? 0. : grid_[row * steps_ + i - 1]) +
+          (i == steps_ - 1 ? 0. : grid_[row * steps_ + i + 1]) +
+          (row == 0 ? 0. : grid_[(row - 1) * steps_ + i]) +
+          (row == steps_ - 1 ? 0. : grid_[(row + 1) * steps_ + i]) -
+            4 * grid_[row * steps_ + i]);
+      }
     }
-
     if (par) b->wait();
     if (swap) std::swap(grid_, grid_tmp_);
     if (par) b->wait();
-
     cur_time += dt_;
   }
+  return;
 }
