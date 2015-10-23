@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
 
   std::cerr << "Main thread id: " << std::this_thread::get_id() << std::endl;
-  const double sim_duration = 0.5;
+  const double sim_duration = 1;
   unsigned num_thr = 1;
   if (argc > 1) {
     num_thr = atoi(argv[1]);
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
   }
   std::cout << "Using " << num_thr << " threads." << std::endl;
 
-  Diffusion d (128, 0.00001, 1);
+  Diffusion d (128, 0.0001, 1);
 
   auto start_t = std::chrono::steady_clock::now();
   d.Simulate(sim_duration);
