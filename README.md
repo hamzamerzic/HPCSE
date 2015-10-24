@@ -1,2 +1,2 @@
 # HPCSE
-High Performance Computing Class - Exercise 1
+High Performance Computing Class Exercises
