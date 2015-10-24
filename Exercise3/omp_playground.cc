@@ -11,4 +11,15 @@ int main() {
         << " of " << omp_get_num_threads() << " threads." << std::endl;
     }
   }
+
+  #pragma omp parallel
+  {
+    for(int i = 0; i < 10; ++i) {
+      #pragma omp for
+      for (int j = 0; j < 10; ++j)
+        std::cout << 10 * i + j << std::endl;
+      #pragma omp single
+      std::cout << "One down" << std::endl;
+    }
+  }
 }
