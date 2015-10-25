@@ -11,22 +11,22 @@ class Barrier {
 
   void wait() {
     // In case not all threads left
-    while (barrier_reached_.load(std::memory_order_acq_rel));
+    while (barrier_reached_.load(std::memory_order_acquire));
 
     ++counter_;  // Each thread enters and increments counter
 
     if (counter_ == nthreads_) {
-      barrier_reached_.store(true, std::memory_order_acq_rel);
+      barrier_reached_.store(true, std::memory_order_release);
     }
 
-    while (!barrier_reached_.load(std::memory_order_acq_rel));
+    while (!barrier_reached_.load(std::memory_order_acquire));
 
     --counter_;
 
     // When last thread leaves, the counter is zero
     if (counter_ == 0) {
       // Resets the barrier_reached -> initial state of the barrier
-      barrier_reached_.store(false, std::memory_order_acq_rel);
+      barrier_reached_.store(false, std::memory_order_release);
     }
   }
 

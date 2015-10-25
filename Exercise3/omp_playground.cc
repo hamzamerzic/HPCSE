@@ -1,6 +1,10 @@
 #include <iostream>
 #include <omp.h>
 
+double g(double x) {
+  return 2 * x;
+}
+
 int main() {
   #pragma omp parallel
   {
@@ -22,4 +26,17 @@ int main() {
       std::cout << "One down" << std::endl;
     }
   }
+
+  double sum = 0.;
+  #pragma omp parallel reduction(+:sum)
+  {
+    double temp = 0.;
+    #pragma omp for
+    for (int i = 0; i < 100; ++i) {
+      temp += g(i);
+    }
+    std::cout << temp << std::endl;
+    sum = temp;
+  }
+  std::cout << sum << std::endl;
 }
