@@ -6,9 +6,14 @@
 int main() {
   std::cerr << "Main thread id: " << omp_get_thread_num() << std::endl;
   const double sim_duration = 1;
-  std::cout << "Using " << omp_get_num_threads() << " threads." << std::endl;
+  int num_threads;
+  #pragma omp parallel
+  #pragma omp master
+  num_threads = omp_get_num_threads();
 
-  Diffusion d (16, 0.00001, 1);
+  std::cout << "Using " << num_threads << " threads." << std::endl;
+
+  Diffusion d (64, 0.0001, 0.5);
 
   auto start_t = std::chrono::steady_clock::now();
   d.Simulate(sim_duration);
