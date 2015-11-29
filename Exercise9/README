@@ -1,0 +1,13 @@
+Compilation istructions:
+
+0.) Clean up the working directory
+make clean
+
+1.) Normal compilation without vectorization
+make
+
+2.) Enable auto vectorization of the compiler
+make auto=1
+
+3.) Compile your AVX vectorized code
+make avx=1
