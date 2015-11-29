@@ -117,15 +117,11 @@ void Diffusion::print_result() {
       int temp = steps_ / size_ + (i < (steps_ % size_));
       recvcnts[i] = temp * steps_;
       displs[i] = i != 0 ? recvcnts[i - 1] + displs[i - 1]: 0;
-      std::cerr << "D" << displs[i] << std::endl;
     }
-    std::cerr << "FIJU";
   }
   MPI_Gatherv(buffer.data(), buffer.size(), MPI_DOUBLE, buffer_r.data(),
     recvcnts.data(), displs.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  std::cerr << "OK" << rank_;
   MPI_Barrier(MPI_COMM_WORLD);
-  std::cerr << "OK!";
   if (rank_ == 0) {
     for (int i = 0; i < steps_; ++i) {
       for (int j = 0; j < steps_; ++j)
